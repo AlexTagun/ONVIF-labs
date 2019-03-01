@@ -1,11 +1,12 @@
 from onvif import ONVIFCamera
 from time import sleep
+import random
 
 class Camera:
-    def __init__(self):
+    def __init__(self, address, port, login, password, wsdlFolder):
         # IP camera initialization
         print 'IP camera initialization'
-        self.mycam = ONVIFCamera('192.168.15.42', 80, 'admin', 'Supervisor', '/etc/onvif/wsdl/wsdl')
+        self.mycam = ONVIFCamera(address, port, login, password, wsdlFolder)
         # print self.mycam.devicemgmt.GetDeviceInformation()
 
         print 'Connected to ONVIF camera'
@@ -70,20 +71,24 @@ class Camera:
         # print service_capabilities
 
         # Getting imaging status
-        status = self.imaging.GetStatus({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
+        self.imagingStatus = self.imaging.GetStatus({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
         request = self.imaging.create_type("GetServiceCapabilities")
         imaging_service_capabilities = self.ptz.GetServiceCapabilities(request)
         # print imaging_service_capabilities
+
+        # Getting imaging move options
+        self.requestFocusChange = self.imaging.create_type("Move")
+        self.requestFocusChange.VideoSourceToken = self.media_profile.VideoSourceConfiguration.SourceToken
     
     # get camera position in this moment
-    def getPosition(self):
+    def getStatus(self):
         return self.ptz.GetStatus({'ProfileToken': self.media_profile._token})
 
     def stop(self):
         self.requestStop.PanTilt = True
         self.requestStop.Zoom = True
         self.ptz.Stop(self.requestStop)
-        print('Stopping camera')
+        # print('Stopping camera')
     
     # Continuous move (xSpeed, ySpeed, zoomSpeed, timeout)
     def continuousMove(self, x, y, z, timeout):
@@ -119,17 +124,84 @@ class Camera:
 
     # Print camera position x, y and zoom
     def printPTZ(self):
-        position = self.getPosition()[0]
+        position = self.getStatus()[0]
         print 'x = {0:2f} y = {1:3f} z = {2:4f}'.format(position.PanTilt[1], position.PanTilt[0], position.Zoom[0])
 
     # Get focus status
     def getFocusStatus(self):
         return self.imaging.GetStatus({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
+    
+    # Focus continuous moving 
+    def focusContinuousMove(self, speed, timeout):
+        self.requestFocusChange.Focus = {
+            "Continuous": {
+                "Speed": speed
+            }
+        }
+        self.imaging.Move(self.requestFocusChange)
+        sleep(timeout)
+        self.stop()
+        sleep(2)
 
-    # Functions for continuous moving
+    # Focus absolute moving 
+    def focusAbsoluteMove(self, position, speed):
+        self.requestFocusChange.Focus.Absolute.Position = float(position)
+        self.requestFocusChange.Focus.Absolute.Speed = float(speed)
+        self.imaging.Move(self.requestFocusChange)
+        sleep(2)
 
+    # print supported PTZ spaces and focus status
+    def printData(self):
+        print self.node.SupportedPTZSpaces
+        print '=========================='
+        print self.imagingStatus
 
+    # functions for cheching camera opportunities
+    # return True if camera supports absolute moving, else false
+    def checkAbsoluteMove(self):
+        position = self.getStatus()
+        self.absoluteMove(random.uniform(-1, 1), random.uniform(-1, 1), random.uniform(0, 1))
+        sleep(3)
+        self.printPTZ()
+        if(self.comparePTZ(position, self.getStatus())):
+            return False
+        else:
+            return True
 
+    def checkFocusMove(self):
+        status = self.getFocusStatus()
+        self.focusContinuousMove(random.uniform(-1, 1), 1)
+        sleep(1)
+        if(self.compareFocus(status, self.getFocusStatus())):
+            return False
+        else:
+            return True
+    
+    def printFocusStatus(self):
+        print 'x = {0:2f}'.format(self.getFocusStatus().FocusStatus20.Position)
+
+    
+    # Compare PTZ of two objects status
+    def comparePTZ(self, a, b):
+        ax = a[0].PanTilt._x
+        ay = a[0].PanTilt._y
+        az = a[0].Zoom._x
+
+        bx = b[0].PanTilt._x
+        by = b[0].PanTilt._y
+        bz = b[0].Zoom._x
+
+        if(ax == bx and ay == by and az == bz):
+            return True
+        else:
+            return False
+
+    # Compare focus of two objects status
+    def compareFocus(self, a, b):
+        if(a.FocusStatus20.Position == b.FocusStatus20.Position):
+            return True
+        else:
+            return False
 
 
 

@@ -3,7 +3,7 @@ from time import sleep
 import math
 from Camera import Camera
 from NumPad import NumPad
-
+from CameraManager import CameraManager
 
 
 def prA():
@@ -61,12 +61,7 @@ if __name__ == "__main__":
 
     # keyboard.add_hotkey('a', prA())
     # keyboard.wait()
-    numPad = NumPad()
-    while(True):
-        numPad.update()
-        pressedKey = numPad.getPressedKey()
-        if(pressedKey):
-            print pressedKey.value
-        else:
-            print "nothing"
-        sleep(0.1)
+    cameraManager = CameraManager()
+    # cameraManager.camera.focusContinuousMove(0, 3)
+    # cameraManager.camera.focusAbsoluteMove(0, 1)
+    cameraManager.moveCameraByNumPad()
