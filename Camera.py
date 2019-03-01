@@ -5,7 +5,7 @@ class Camera:
     def __init__(self):
         # IP camera initialization
         print 'IP camera initialization'
-        self.mycam = ONVIFCamera('192.168.15.42', 80, 'ilyahandsup', 'rmvtJ8hGqETY5lnj', '/etc/onvif/wsdl/wsdl')
+        self.mycam = ONVIFCamera('192.168.15.42', 80, 'admin', 'Supervisor', '/etc/onvif/wsdl/wsdl')
         # print self.mycam.devicemgmt.GetDeviceInformation()
 
         print 'Connected to ONVIF camera'
