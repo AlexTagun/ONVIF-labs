@@ -5,7 +5,7 @@ class Camera:
     def __init__(self):
         # IP camera initialization
         print 'IP camera initialization'
-        self.mycam = ONVIFCamera('192.168.15.43', 80, 'admin', 'Supervisor', '/etc/onvif/wsdl/wsdl')
+        self.mycam = ONVIFCamera('192.168.15.42', 80, 'ilyahandsup', 'rmvtJ8hGqETY5lnj', '/etc/onvif/wsdl/wsdl')
         # print self.mycam.devicemgmt.GetDeviceInformation()
 
         print 'Connected to ONVIF camera'
@@ -43,17 +43,21 @@ class Camera:
         # Getting needed requests
 
         # Continuous move
-        self.request_continuous_move = self.ptz.create_type('ContinuousMove')
-        self.request_continuous_move.ProfileToken = self.media_profile._token
+        self.requestContinuousMove = self.ptz.create_type('ContinuousMove')
+        self.requestContinuousMove.ProfileToken = self.media_profile._token
         # print self.request_continuous_move
 
+        # Absolute move
+        self.requestAbsoluteMove = self.ptz.create_type("AbsoluteMove")
+        self.requestAbsoluteMove.ProfileToken = self.media_profile._token
+
         # Relative move
-        self.request_relative_move = self.ptz.create_type('RelativeMove')
-        self.request_relative_move.ProfileToken = self.media_profile._token
+        self.requestRelativeMove = self.ptz.create_type('RelativeMove')
+        self.requestRelativeMove.ProfileToken = self.media_profile._token
 
         # Stop move
-        self.request_stop = self.ptz.create_type('Stop')
-        self.request_stop.ProfileToken = self.media_profile._token
+        self.requestStop = self.ptz.create_type('Stop')
+        self.requestStop.ProfileToken = self.media_profile._token
         # print self.request_stop
 
         # Creating imaging service
@@ -67,34 +71,70 @@ class Camera:
 
         # Getting imaging status
         status = self.imaging.GetStatus({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
-        # print status
+        request = self.imaging.create_type("GetServiceCapabilities")
+        imaging_service_capabilities = self.ptz.GetServiceCapabilities(request)
+        # print imaging_service_capabilities
     
     # get camera position in this moment
     def getPosition(self):
         return self.ptz.GetStatus({'ProfileToken': self.media_profile._token})
 
     def stop(self):
-        self.request_stop.PanTilt = True
-        self.request_stop.Zoom = True
-        self.ptz.Stop(self.request_stop)
+        self.requestStop.PanTilt = True
+        self.requestStop.Zoom = True
+        self.ptz.Stop(self.requestStop)
         print('Stopping camera')
     
-    # Continuous move functions
-    def performContinuousMove(self, timeout):
+    # Continuous move (xSpeed, ySpeed, zoomSpeed, timeout)
+    def continuousMove(self, x, y, z, timeout):
         # Start continuous move
-        self.ptz.ContinuousMove(self.request_continuous_move)
+        # status = self.ptz.GetStatus({"ProfileToken": self.media_profile._token})
+        # status.Position.PanTilt[0] = str(x)
+        self.requestContinuousMove.Velocity.PanTilt._x = str(x)
+        self.requestContinuousMove.Velocity.PanTilt._y = str(y)
+        self.requestContinuousMove.Velocity.Zoom._x = str(z)
+        # self.requestContinuousMove[1].PanTilt[1] = str(y)
+        # self.requestContinuousMove[1].Zoom[0] = str(z)
+        # print self.requestContinuousMove.Velocity.PanTilt
+        # print status.Position.PanTilt._x
+        # print self.requestContinuousMove
+        # print self.requestContinuousMove
+        self.ptz.ContinuousMove(self.requestContinuousMove)
 
         # Wait a certain time
         sleep(timeout)
 
-        # Stop continuous move
-        self.stop()
+        # # Stop continuous move
+        # self.stop()
 
-        # print('Continuous move completed')
-        sleep(2)
+        # # print('Continuous move completed')
+        # sleep(2)
+
+    # Absolute move
+    def absoluteMove(self, x, y, z):
+        self.requestAbsoluteMove.Position.PanTilt._x = str(x)
+        self.requestAbsoluteMove.Position.PanTilt._y = str(y)
+        self.requestAbsoluteMove.Position.Zoom._x = str(z)
+        self.ptz.AbsoluteMove(self.requestAbsoluteMove)
 
     # Print camera position x, y and zoom
     def printPTZ(self):
         position = self.getPosition()[0]
         print 'x = {0:2f} y = {1:3f} z = {2:4f}'.format(position.PanTilt[1], position.PanTilt[0], position.Zoom[0])
+
+    # Get focus status
+    def getFocusStatus(self):
+        return self.imaging.GetStatus({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
+
+    # Functions for continuous moving
+
+
+
+
+
+
+
+
+    
+
 
