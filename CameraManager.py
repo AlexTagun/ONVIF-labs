@@ -2,6 +2,7 @@ from Camera import Camera
 from NumPad import NumPad
 from time import sleep
 import random
+import math
 
 class CameraManager:
     def __init__(self, address, port, login, password, wsdlFolder):
@@ -63,6 +64,29 @@ class CameraManager:
         except Exception as e:
             print 'Continuous focus move is not supported'
 
+    def rotareOneCircle(self):
+        angle = 0
+        self.camera.absoluteMove(0, 0, 0)
+        sleep(10)
+        flag = True
+        r = 0.2
+        circleTime = 75
+        while(flag):
+            x = math.cos(math.radians(angle))
+            y = math.sin(math.radians(angle))
+            if(-0.001 < x < 0.001): x = 0
+            if(-0.001 < y < 0.001): y = 0
+            print x, y
+            print angle
+            self.camera.continuousMove(x*r, y*r, 0, 0)
+            
+            angle += 10
+            sleep((circleTime * 5 )/360)
+            # camera.stop()
+            
+            if(angle > 360):
+                break
+        self.camera.stop()
 
         
         

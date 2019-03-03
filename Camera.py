@@ -92,28 +92,12 @@ class Camera:
     
     # Continuous move (xSpeed, ySpeed, zoomSpeed, timeout)
     def continuousMove(self, x, y, z, timeout):
-        # Start continuous move
-        # status = self.ptz.GetStatus({"ProfileToken": self.media_profile._token})
-        # status.Position.PanTilt[0] = str(x)
         self.requestContinuousMove.Velocity.PanTilt._x = str(x)
         self.requestContinuousMove.Velocity.PanTilt._y = str(y)
         self.requestContinuousMove.Velocity.Zoom._x = str(z)
-        # self.requestContinuousMove[1].PanTilt[1] = str(y)
-        # self.requestContinuousMove[1].Zoom[0] = str(z)
-        # print self.requestContinuousMove.Velocity.PanTilt
-        # print status.Position.PanTilt._x
-        # print self.requestContinuousMove
-        # print self.requestContinuousMove
         self.ptz.ContinuousMove(self.requestContinuousMove)
 
-        # Wait a certain time
         sleep(timeout)
-
-        # # Stop continuous move
-        # self.stop()
-
-        # # print('Continuous move completed')
-        # sleep(2)
 
     # Absolute move
     def absoluteMove(self, x, y, z):
