@@ -76,10 +76,10 @@ class Camera:
         imaging_service_capabilities = self.ptz.GetServiceCapabilities(request)
         # print imaging_service_capabilities
 
-        # Getting imaging move options
-        self.requestFocusChange = self.imaging.create_type("Move")
-        self.requestFocusChange.VideoSourceToken = self.media_profile.VideoSourceConfiguration.SourceToken
-    
+        # Create request for setting imaging settings
+        self.requestSetImagingSettings = self.imaging.create_type("SetImagingSettings")
+        self.requestSetImagingSettings.VideoSourceToken = self.media_profile.VideoSourceConfiguration.SourceToken
+
     # get camera position in this moment
     def getStatus(self):
         return self.ptz.GetStatus({'ProfileToken': self.media_profile._token})
@@ -133,6 +133,7 @@ class Camera:
     
     # Focus continuous moving 
     def focusContinuousMove(self, speed, timeout):
+        self.requestFocusChange = self.createFocusMoveRequest()
         self.requestFocusChange.Focus = {
             "Continuous": {
                 "Speed": speed
@@ -145,11 +146,27 @@ class Camera:
 
     # Focus absolute moving 
     def focusAbsoluteMove(self, position, speed):
+        self.requestFocusChange = self.createFocusMoveRequest()
         self.requestFocusChange.Focus.Absolute.Position = float(position)
         self.requestFocusChange.Focus.Absolute.Speed = float(speed)
         self.imaging.Move(self.requestFocusChange)
         sleep(2)
 
+    #Focus relative moving
+    def focusRelativeMove(self, speed):
+        self.requestFocusChange = self.createFocusMoveRequest()
+        self.requestFocusChange.Focus.Relative.Speed = speed
+        self.imaging.Move(self.requestFocusChange)
+        sleep(2)
+
+    # Create pattern of focus move request
+    def createFocusMoveRequest(self)
+        requestFocusChange = self.imaging.create_type("Move")
+        requestFocusChange.VideoSourceToken = self.media_profile.VideoSourceConfiguration.SourceToken
+        return requestFocusChange
+
+    
+    
     # print supported PTZ spaces and focus status
     def printData(self):
         print self.node.SupportedPTZSpaces
@@ -180,7 +197,21 @@ class Camera:
     def printFocusStatus(self):
         print 'x = {0:2f}'.format(self.getFocusStatus().FocusStatus20.Position)
 
+    def printImagingSettings(self):
+        print self.imaging.GetImagingSettings({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
     
+    def setFocusModeAuto(self):
+        # request = self.imaging.GetImagingSettings({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
+        self.requestSetImagingSettings.ImagingSettings.Focus.AutoFocusMode = "AUTO"
+        self.imaging.SetImagingSettings(self.requestSetImagingSettings)
+
+    def setFocusModeManual(self):
+        currentSettings = self.imaging.GetImagingSettings({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
+        self.requestSetImagingSettings.ImagingSettings = currentSettings
+        self.requestSetImagingSettings.ImagingSettings.Focus.AutoFocusMode = "MANUAL"
+        print self.requestSetImagingSettings
+        self.imaging.SetImagingSettings(self.requestSetImagingSettings)
+
     # Compare PTZ of two objects status
     def comparePTZ(self, a, b):
         ax = a[0].PanTilt._x

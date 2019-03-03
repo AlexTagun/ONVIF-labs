@@ -2,7 +2,8 @@ from Key import Key
 
 class NumPad:
     def __init__(self):
-        self.keys = [Key('1'), Key('2'), Key('3'), Key('4'), Key('5'), Key('6'), Key('7'), Key('8'), Key('9'), Key('-'), Key('+')]
+        self.keys = [Key('1'), Key('2'), Key('3'), Key('4'), Key('5'), Key('6'), Key('7'), Key('8'), Key('9'), Key('-'), Key('+'), Key('z'), Key('x')]
+        self.speed = 1
         self.dictionary = {
             '1' : {'x' : -1, 'y' : -1, 'z' :  0},
             '2' : {'x' :  0, 'y' : -1, 'z' :  0},
@@ -15,6 +16,7 @@ class NumPad:
             '-' : {'x' :  0, 'y' :  0, 'z' : -1},
             '+' : {'x' :  0, 'y' :  0, 'z' :  1},
         }
+
     def update(self):
         for key in self.keys:
             key.update()
@@ -24,6 +26,16 @@ class NumPad:
             if(key.isPressed):
                 return key
         return None
+
+    def increaseSpeed(self):
+        self.speed += 0.1
+        if(self.speed > 1): self.speed = 1
+        print self.speed
+
+    def decreaseSpeed(self):
+        self.speed -= 0.1
+        if(self.speed < 0.1): self.speed = 0
+        print self.speed
     
     # Get Velocity for continuous moving, whitch depends on pressed key
     def getVelocity(self, key):

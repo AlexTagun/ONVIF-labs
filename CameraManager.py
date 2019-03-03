@@ -20,9 +20,18 @@ class CameraManager:
             numPad.update()
             pressedKey = numPad.getPressedKey()
             if(pressedKey):
+                sleep(0.5)
+                if(pressedKey.value == 'z'):
+                    numPad.decreaseSpeed()
+                    continue
+                if(pressedKey.value == 'x'):
+                    numPad.increaseSpeed()
+                    continue
                 Velocity = numPad.getVelocity(pressedKey)
-                self.camera.continuousMove(Velocity.get('x', 0), Velocity.get('y', 0), Velocity.get('z', 0), 0)
+
+                speed = numPad.speed
+                self.camera.continuousMove(Velocity.get('x', 0) * speed, Velocity.get('y', 0) * speed, Velocity.get('z', 0) * speed, 0)
             else:
                 self.camera.stop()
             self.camera.printPTZ()
-            sleep(0.3)
+            
