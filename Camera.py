@@ -132,7 +132,7 @@ class Camera:
         return self.imaging.GetStatus({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
     
     # Focus continuous moving 
-    def focusContinuousMove(self, speed, timeout):
+    def focusContinuousMove(self, speed):
         self.requestFocusChange = self.createFocusMoveRequest()
         self.requestFocusChange.Focus = {
             "Continuous": {
@@ -140,9 +140,6 @@ class Camera:
             }
         }
         self.imaging.Move(self.requestFocusChange)
-        sleep(timeout)
-        self.stop()
-        sleep(2)
 
     # Focus absolute moving 
     def focusAbsoluteMove(self, position, speed):
@@ -160,7 +157,7 @@ class Camera:
         sleep(2)
 
     # Create pattern of focus move request
-    def createFocusMoveRequest(self)
+    def createFocusMoveRequest(self):
         requestFocusChange = self.imaging.create_type("Move")
         requestFocusChange.VideoSourceToken = self.media_profile.VideoSourceConfiguration.SourceToken
         return requestFocusChange
@@ -185,14 +182,7 @@ class Camera:
         else:
             return True
 
-    def checkFocusMove(self):
-        status = self.getFocusStatus()
-        self.focusContinuousMove(random.uniform(-1, 1), 1)
-        sleep(1)
-        if(self.compareFocus(status, self.getFocusStatus())):
-            return False
-        else:
-            return True
+
     
     def printFocusStatus(self):
         print 'x = {0:2f}'.format(self.getFocusStatus().FocusStatus20.Position)
@@ -209,7 +199,7 @@ class Camera:
         currentSettings = self.imaging.GetImagingSettings({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
         self.requestSetImagingSettings.ImagingSettings = currentSettings
         self.requestSetImagingSettings.ImagingSettings.Focus.AutoFocusMode = "MANUAL"
-        print self.requestSetImagingSettings
+
         self.imaging.SetImagingSettings(self.requestSetImagingSettings)
 
     # Compare PTZ of two objects status

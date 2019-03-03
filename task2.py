@@ -15,5 +15,5 @@ if __name__ == "__main__":
     
     camera.printPTZ()
     camera.absoluteMove(0.1, 0.5, 1)
-    sleep(5)
+    sleep(15)
     camera.printPTZ()
