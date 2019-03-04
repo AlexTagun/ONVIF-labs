@@ -8,10 +8,10 @@ def printFocusPosition(camera, word):
 
 if __name__ == "__main__":
     # User data
-    address = '192.168.15.43'
+    address = '192.168.15.42'
     port = 80
-    login = 'admin'
-    password = 'Supervisor'
+    login = 'alextagun'
+    password = 'HSrdajML01pn'
     wsdlFolder = '/etc/onvif/wsdl/wsdl'
 
     # Program

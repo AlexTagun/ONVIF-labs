@@ -21,6 +21,12 @@ if __name__ == "__main__":
 
     try:
         self.camera.focusAbsoluteMove(random.uniform(-1, 1), 1)
-        print 'Absolute focus move should be successful'
+        print 'Camera was moved by absolute way'
     except Exception as e:
         print 'Absolute focus move is not supported'
+
+    try:
+            self.camera.focusRelativeMove(random.uniform(-1, 1))
+            print 'Camera was moved by relative way'
+    except Exception as e:
+        print 'Relative focus move is not supported'
