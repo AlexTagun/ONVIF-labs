@@ -1,0 +1,23 @@
+[
+    {
+        "address": "192.168.15.42",
+        "port": 80,
+        "login": "alextagun",
+        "password": "HSrdajML01pn",
+        "wsdlFolder": "/etc/onvif/wsdl/wsdl"
+    },
+    {
+        "address": "192.168.15.43",
+        "port": 80,
+        "login": "alextagun",
+        "password": "HSrdajML01pn",
+        "wsdlFolder": "/etc/onvif/wsdl/wsdl"
+    },
+    {
+        "address": "192.168.15.45",
+        "port": 80,
+        "login": "alextagun",
+        "password": "HSrdajML01pn",
+        "wsdlFolder": "/etc/onvif/wsdl/wsdl"
+    }
+]

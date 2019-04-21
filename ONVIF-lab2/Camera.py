@@ -1,10 +1,16 @@
 from onvif import ONVIFCamera
 from time import sleep
+import urllib2
 import random
 
 class Camera:
     def __init__(self, address, port, login, password, wsdlFolder):
         # IP camera initialization
+        self.address = address
+        self.port = port
+        self.login = login
+        self.password = password
+        self.wsdlFolder = wsdlFolder
         print 'IP camera initialization'
         self.mycam = ONVIFCamera(address, port, login, password, wsdlFolder)
         # print self.mycam.devicemgmt.GetDeviceInformation()
@@ -24,7 +30,7 @@ class Camera:
         self.requestSetImagingSettings = self.imaging.create_type("SetImagingSettings")
         self.requestSetImagingSettings.VideoSourceToken = self.media_profile.VideoSourceConfiguration.SourceToken
         
-    
+    # Functions for requests
     def getImagingSettings(self):
         return self.imaging.GetImagingSettings({'VideoSourceToken': self.media_profile.VideoSourceConfiguration.SourceToken})
     
@@ -85,3 +91,26 @@ class Camera:
         if(curVal > maxVal):
             return maxVal
         return curVal
+
+    def downloadPreviewImage(self):
+        previewUri = self.getPreview().Uri
+        # print previewUri
+        manager = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        manager.add_password(None, previewUri, self.login, self.password)
+
+        #Create an authentication handler using the password manager
+        auth = urllib2.HTTPBasicAuthHandler(manager)
+
+        #Create an opener that will replace the default urlopen method on further calls
+        opener = urllib2.build_opener(auth)
+        urllib2.install_opener(opener)
+
+        #Here you should access the full url you wanted to open
+        image_on_web = urllib2.urlopen(previewUri)
+        buf = image_on_web.read()
+
+        filename = self.address + ".jpg"
+        downloaded_image = open(filename, "wb")
+        downloaded_image.write(buf)
+        downloaded_image.close()
+        image_on_web.close()
